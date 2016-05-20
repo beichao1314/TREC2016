@@ -110,6 +110,7 @@ for tweets in rootr:
     for files1 in list1:
         filepath2=os.path.join(filepath1,files1)
         list2=os.listdir(filepath2)
+        numOfTwitterOfDay=0
         for files2 in list2:
             filepath3=os.path.join(filepath2,files2)
             list3=os.listdir(filepath3)
@@ -249,10 +250,11 @@ for tweets in rootr:
                                         kld+=(Ti[word]*math.log(Ti[word]/Tj[word]))
                                     KLD.append(kld)
                                 KLd=min(KLD)
-                                if KLd>=max(summary_KLd):
+                                if KLd>=max(summary_KLd) and numOfTwitterOfDay<10:
                                     summary.append(corpus[i])
                                     summary_tfidf.append(tfidf(i))
                                     summary_KLd.append(KLd)
+                                    numOfTwitterOfDay+=1
                                     with open('E:/TREC/summary/summary.txt','a')as fa:
                                         fa.write(corpus_interest_profile[i]+': '+'id_str: '+corpus_id[i]+'\n'+'text: '+'\n'+corpus[i]+'\n')
                                         print('publish a twitter!'+' time: '+time.strftime('%X',time.localtime(time.time())))
