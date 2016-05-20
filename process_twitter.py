@@ -111,6 +111,10 @@ for tweets in rootr:
         filepath2=os.path.join(filepath1,files1)
         list2=os.listdir(filepath2)
         numOfTwitterOfDay=0
+        with open('E:/TREC/summary/summary.txt','a')as fa:
+            fa.write('day: '+files1+'\n')
+            fa.write('________________________________________'+'\n')
+            
         for files2 in list2:
             filepath3=os.path.join(filepath2,files2)
             list3=os.listdir(filepath3)
@@ -234,6 +238,7 @@ for tweets in rootr:
                         if len(summary)==0:
                                 with open('E:/TREC/summary/summary.txt','a')as fa:
                                     fa.write(corpus_interest_profile[i]+': '+'id_str: '+corpus_id[i]+'\n'+'text: '+'\n'+corpus[i]+'\n')
+                                    fa.write('\n')
                                     print('publish a twitter!'+' time: '+time.strftime('%X',time.localtime(time.time())))
                         else:
                             if tfidf[i]>=max(summary_tfidf):
@@ -257,5 +262,7 @@ for tweets in rootr:
                                     numOfTwitterOfDay+=1
                                     with open('E:/TREC/summary/summary.txt','a')as fa:
                                         fa.write(corpus_interest_profile[i]+': '+'id_str: '+corpus_id[i]+'\n'+'text: '+'\n'+corpus[i]+'\n')
+                                        fa.write('\n')
                                         print('publish a twitter!'+' time: '+time.strftime('%X',time.localtime(time.time())))
+                                        
                         i+=1
