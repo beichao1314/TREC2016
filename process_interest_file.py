@@ -55,11 +55,11 @@ if __name__=='__main__':
         print(titlenum)
         print(descnum)
         title=a[titlenum:descnum-1]
-        title=''.join(title)
+        title=' '.join(title)
         desc=a[descnum:narrnum-1]
-        desc=''.join(desc)
+        desc=' '.join(desc)
         narr=a[narrnum:downnum-1]
-        narr=''.join(narr)
+        narr=' '.join(narr)
         print(num)
         print(title)
         print(desc)
