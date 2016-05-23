@@ -56,6 +56,7 @@ def filters(words):
         if not(word in english_punctuations):
             filterwords.append(word)
     return filterwords
+    
 def calTheta(words, stream):
     theta={}
     lenOfWords=float(len(words))
@@ -111,7 +112,9 @@ for tweets in rootr:
         filepath2=os.path.join(filepath1,files1)
         list2=os.listdir(filepath2)
         numOfTwitterOfDay=0
-        with open('E:/TREC/summary/summary.txt','a')as fa:
+        numbertxt=number+'.txt'
+        summaryfilepath=os.path.join('E:/TREC/summary/',numbertxt)
+        with open(summaryfilepath,'a',encoding='utf-8')as fa:
             fa.write('day: '+files1+'\n')
             fa.write('________________________________________'+'\n')
             
@@ -120,6 +123,9 @@ for tweets in rootr:
             list3=os.listdir(filepath3)
             for files3 in list3:
                 filepath4=os.path.join(filepath3,files3)
+                """if numOfTwitterOfDay>=10:
+                    continue
+                else:"""
                 with bz2file.open(filepath4,'r') as f:
                     print(filepath4+'; time: '+time.strftime('%X',time.localtime(time.time())))
                     number=tweets.find('Number').text
@@ -214,55 +220,61 @@ for tweets in rootr:
                     #print word
                     weight=tfidfs.toarray()#将tf-idf矩阵抽取出来，元素a[i][j]表示j词在i类文本中的tf-idf权重
                     print('______________________')
-                    while(i<len(corpus)):                      
-                        #for id_str in corpus_id[i:]:
-                        d={}
-                        for j in range(len(corpus_word)):
-                            d[corpus_word[j]]=weight[i][j]
-                        tfidf_i=0
-                        #print(len(decay))
-                        for word in corpus_word:
-                            #print(word)
-                            #print(decay[i])
-                            if not(word in decay[i]):
-                                continue
-                            else:
-                                tfidf_i+=decay[i][word]*d[word]
-                        #strs='inerest profile:'+ corpus_interest_profile[i]+' '+'id_str:'+corpus_id[i] +' '+'tfidf:'+ str(tfidf)+'\n'
-                        #print(strs)
-                        tfidf.append(tfidf_i)
-                        """with open('E:/TREC/tfidf/tfidf.txt','a') as fa:
-                            fa.write(strs)"""
-                            #print(time.strftime('%X',time.localtime(time.time())))
-                            #print('print completed! i='+str(i)+'; time: '+time.strftime('%X',time.localtime(time.time())))
-                        if len(summary)==0:
-                                with open('E:/TREC/summary/summary.txt','a')as fa:
-                                    fa.write(corpus_interest_profile[i]+': '+'id_str: '+corpus_id[i]+'\n'+'text: '+'\n'+corpus[i]+'\n')
-                                    fa.write('\n')
-                                    print('publish a twitter!'+' time: '+time.strftime('%X',time.localtime(time.time())))
+                    while(i<len(corpus)): 
+                        if numOfTwitterOfDay>=10:
+                            break
                         else:
-                            if tfidf[i]>=max(summary_tfidf):
-                                #KLd=KLdivergence(corpus[i],summary,stream_word(0:(stream_word.index(corpus[i])+1)),i)
-                                KLd=0.0
-                                KLD=[]
-                                for summ in summary:
-                                    kld=0.0
-                                    summ_word=nltk.word_tokenize(summ)
-                                    sameWords=[word for word in summ_word if word in nltk.word_tokenize(corpus[i])]
-                                    Ti=calTheta(sameWords, stream_word[0:stream_word.index(corpus[i])+1])                                    
-                                    Tj=calTheta(sameWords, stream_word[0:stream_word.index(summ)+1])
-                                    for word in sameWords:
-                                        kld+=(Ti[word]*math.log(Ti[word]/Tj[word]))
-                                    KLD.append(kld)
-                                KLd=min(KLD)
-                                if KLd>=max(summary_KLd) and numOfTwitterOfDay<10:
-                                    summary.append(corpus[i])
-                                    summary_tfidf.append(tfidf(i))
-                                    summary_KLd.append(KLd)
-                                    numOfTwitterOfDay+=1
-                                    with open('E:/TREC/summary/summary.txt','a')as fa:
-                                        fa.write(corpus_interest_profile[i]+': '+'id_str: '+corpus_id[i]+'\n'+'text: '+'\n'+corpus[i]+'\n')
-                                        fa.write('\n')
+                            #for id_str in corpus_id[i:]:
+                            d={}
+                            for j in range(len(corpus_word)):
+                                d[corpus_word[j]]=weight[i][j]
+                            tfidf_i=0
+                            #print(len(decay))
+                            for word in corpus_word:
+                                #print(word)
+                                #print(decay[i])
+                                if not(word in decay[i]):
+                                    continue
+                                else:
+                                    tfidf_i+=decay[i][word]*d[word]
+                            #strs='inerest profile:'+ corpus_interest_profile[i]+' '+'id_str:'+corpus_id[i] +' '+'tfidf:'+ str(tfidf)+'\n'
+                            #print(strs)
+                            tfidf.append(tfidf_i)
+                            """with open('E:/TREC/tfidf/tfidf.txt','a') as fa:
+                                fa.write(strs)"""
+                                #print(time.strftime('%X',time.localtime(time.time())))
+                                #print('print completed! i='+str(i)+'; time: '+time.strftime('%X',time.localtime(time.time())))
+                            if len(summary)==0:
+                                    with open(summaryfilepath,'a',encoding='utf-8')as fa:
+                                        fa.write(corpus_id[i]+'\n')
+                                        numOfTwitterOfDay=1+numOfTwitterOfDay                                       
+                                        #fa.write('\n')
                                         print('publish a twitter!'+' time: '+time.strftime('%X',time.localtime(time.time())))
-                                        
-                        i+=1
+                            else:
+                                if tfidf[i]>=max(summary_tfidf):
+                                    #KLd=KLdivergence(corpus[i],summary,stream_word(0:(stream_word.index(corpus[i])+1)),i)
+                                    KLd=0.0
+                                    KLD=[]
+                                    for summ in summary:
+                                        kld=0.0
+                                        summ_word=nltk.word_tokenize(summ)
+                                        sameWords=[word for word in summ_word if word in nltk.word_tokenize(corpus[i])]
+                                        Ti=calTheta(sameWords, stream_word[0:stream_word.index(corpus[i])+1])                                    
+                                        Tj=calTheta(sameWords, stream_word[0:stream_word.index(summ)+1])
+                                        for word in sameWords:
+                                            kld+=(Ti[word]*math.log(Ti[word]/Tj[word]))
+                                        KLD.append(kld)
+                                    KLd=min(KLD)
+                                    if KLd>=max(summary_KLd) :
+                                        summary.append(corpus[i])
+                                        summary_tfidf.append(tfidf(i))
+                                        summary_KLd.append(KLd)
+                                        numOfTwitterOfDay=1+numOfTwitterOfDay
+                            
+                                        with open(summaryfilepath,'a',encoding='utf-8')as fa:
+                                            fa.write(corpus_id[i]+'\n')
+                                            #fa.write('num: '+numOfTwitterOfDay+'\n')                                            
+                                            #fa.write('\n')
+                                            print('publish a twitter!'+' time: '+time.strftime('%X',time.localtime(time.time())))
+                                            
+                            i+=1
