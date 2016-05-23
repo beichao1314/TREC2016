@@ -112,9 +112,9 @@ for tweets in rootr:
         filepath2=os.path.join(filepath1,files1)
         list2=os.listdir(filepath2)
         numOfTwitterOfDay=0
-        numbertxt=number+'.txt'
-        summaryfilepath=os.path.join('E:/TREC/summary/',numbertxt)
-        with open(summaryfilepath,'a',encoding='utf-8')as fa:
+        #numbertxt=number+'.txt'
+        #summaryfilepath=os.path.join('E:/TREC/summary/',numbertxt)
+        with open('E:/TREC/summary/summary.txt','a',encoding='utf-8')as fa:
             fa.write('day: '+files1+'\n')
             fa.write('________________________________________'+'\n')
             
@@ -245,8 +245,8 @@ for tweets in rootr:
                                 #print(time.strftime('%X',time.localtime(time.time())))
                                 #print('print completed! i='+str(i)+'; time: '+time.strftime('%X',time.localtime(time.time())))
                             if len(summary)==0:
-                                    with open(summaryfilepath,'a',encoding='utf-8')as fa:
-                                        fa.write(corpus_id[i]+'\n')
+                                    with open('E:/TREC/summary/summary.txt','a',encoding='utf-8')as fa:
+                                        fa.write(corpus_interest_profile[i]+' '+corpus_id[i]+'\n')
                                         numOfTwitterOfDay=1+numOfTwitterOfDay                                       
                                         #fa.write('\n')
                                         print('publish a twitter!'+' time: '+time.strftime('%X',time.localtime(time.time())))
@@ -271,8 +271,8 @@ for tweets in rootr:
                                         summary_KLd.append(KLd)
                                         numOfTwitterOfDay=1+numOfTwitterOfDay
                             
-                                        with open(summaryfilepath,'a',encoding='utf-8')as fa:
-                                            fa.write(corpus_id[i]+'\n')
+                                        with open('E:/TREC/summary/summary.txt','a',encoding='utf-8')as fa:
+                                            fa.write(corpus_interest_profile[i]+' '+corpus_id[i]+'\n')
                                             #fa.write('num: '+numOfTwitterOfDay+'\n')                                            
                                             #fa.write('\n')
                                             print('publish a twitter!'+' time: '+time.strftime('%X',time.localtime(time.time())))
