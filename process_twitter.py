@@ -17,6 +17,7 @@ import re
 from sklearn.feature_extraction.text import TfidfTransformer  
 from sklearn.feature_extraction.text import CountVectorizer  
 import time
+
 def removeStopWords_2(originSegs):
     stops = set(stopwords.words('english'))
     resultStr = ''
@@ -75,7 +76,9 @@ def calTheta(words, stream):
         Ps=numOfWordInWords/float(numOfWordInStream)
         theta[word]=0.9*Pt+0.1*Ps
     return theta
-            
+       
+
+
 filepath1='F:/twitter/07/'
 #corpus_words={}
 list1=os.listdir(filepath1)
@@ -194,10 +197,12 @@ for tweets in rootr:
                                     if deta < 7200000:
                                         sss=((float(deta-3600000.0))/3600000.0)*((float(deta-3600000.0))/3600000.0)
                                         words_decay[word]=sss
+                                        corpus_words_time[word]=float(tweet['timestamp_ms'])
                                     else:
                                         words_decay[word]=1
+                                        corpus_words_time[word]=float(tweet['timestamp_ms'])
                             decay[i+n]=words_decay
-                            
+                        
                             #print(text)
                             corpus.append(text)
                             corpus_id.append(tweet['id_str'])
@@ -277,4 +282,6 @@ for tweets in rootr:
                                             #fa.write('\n')
                                             print('publish a twitter!'+' time: '+time.strftime('%X',time.localtime(time.time())))
                                             
+                            print(len(decay))    
+                            print(i)
                             i+=1
