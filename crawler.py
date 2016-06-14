@@ -17,9 +17,11 @@ class MyStreamListener(tweepy.StreamListener):
         print("status:"+status.text)
     def on_data(self,raw_data):
         data = json.loads(raw_data)
-        """d=dict(data)
-        if len(d.keys())!=1:
-            print(data['text'])"""
+        if 'delete' in data:
+            pass
+        d=dict(data)
+        #if len(d.keys())!=1:
+        print(type(data))
         #print(len(d.keys()))
         pass
     
@@ -37,7 +39,7 @@ api = tweepy.API(auth)
 #api = tweepy.API(auth,proxy="")
 filepath='E:/TREC/TREC2015-tweetids.txt.bz2'
 #print(api.get_status(622582311184306176))
-with bz2file.open(filepath,'r') as fr:
+"""with bz2file.open(filepath,'r') as fr:
     #print(type(lines))
     for line in fr:
         strs=str(line,encoding='utf-8')   
@@ -57,4 +59,4 @@ with bz2file.open(filepath,'r') as fr:
 myStreamListener = MyStreamListener()
 myStream = tweepy.Stream(auth = api.auth, listener=myStreamListener)
 #myStream.filter(track=['python'])
-myStream.sample()"""
+myStream.sample()

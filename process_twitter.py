@@ -131,15 +131,6 @@ for tweets in rootr:
                 else:"""
                 with bz2file.open(filepath4,'r') as f:
                     print(filepath4+'; time: '+time.strftime('%X',time.localtime(time.time())))
-                    number=tweets.find('Number').text
-                    #print(number)
-                    title=tweets.find('title').text
-                    #print(title)
-                    titlewords=nltk.word_tokenize(title)
-                    titlewords=filters(titlewords)
-                    removeStopWords_interest_profile=removeStopWords_1(titlewords)
-                    #print(removeStopWords)
-                    stemwords_interest_profile=StemWords(removeStopWords_interest_profile)
                     n=0
                     for line in f: 
                         #line=str(line)
