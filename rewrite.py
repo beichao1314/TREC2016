@@ -107,6 +107,8 @@ def preprocess(sentence):
     removestopwords=removeStopWords_1(filterwords)
     stemwords=StemWords(removestopwords)
     return stemwords
+
+#def Sql(sql,)
     
 def pushSummary(tweet):
     
@@ -116,7 +118,9 @@ def pushSummary(tweet):
     rootr = tree.getroot()
     for interest_file in rootr:
         wordInTweet={}
-        numOfWords=0
+        numOfTweetOccurs={}
+        numOfWord=0
+        tfidf={}
         number=interest_file.find('Number').text
         #print(number)
         title=interest_file.find('title').text
@@ -130,13 +134,16 @@ def pushSummary(tweet):
         results=re.compile(r'http://[a-zA-Z0-9.?/&=:]*',re.S)
         content=results.sub("",content)
         stemwords_tweet=preprocess(content)
-        if tweet['lang']=='en':
+        if tweet['lang']!='en':
+            pass
+        else:
             count=0
             for wordsss in stemwords_interest_profile:
                 if wordsss in stemwords_tweet:
                     count+=1
             if count>=2:
-                numOfWords+=len(stemwords_tweet)
+                numOfWord+=len(stemwords_tweet)
+                SumOfLenthOfStream+=numOfWord
                 for word in stemwords_tweet:
                     if word in wordInTweet:
                         wordInTweet[word]+=1
@@ -146,39 +153,123 @@ def pushSummary(tweet):
                         wordInStream[word]+=1
                     else:
                         wordInStream[word]=1
-                cur.execute('select * from queries where query=(%s)',(number))
-                conn.commit()
-                cur.fetchone()
+                    if word not in numOfTweetOccurs:
+                        numOfTweetOccurs[word]=1
+                    
+                if cur.execute('select 1 from queries where query=(%s) limit 1',(number))==1:
+                    cur.execute('select numOfWord from queries where query=(%s)',(number))
+                    conn.commit()
+                    numOfWord+=cur.fetchone()
+                    cur.execute('update queries set numOfWord=(%s) where query=(%s)',(numOfWord,number))
+                    conn.commit()
+                    cur.execute('select numOfTweet from queries where query=(%s)',(number))
+                    numOfTweet=cur.fetchone()+1
+                    conn.commit()
+                    cur.execute('updata queries set numOfTweet=(%s) where query=(%s)',(numOfTweet,number))
+                    conn.commit()
+                else:
+                    cur.execute('insert into queries(query,numOfWord,numOfTweet) values(%s,%s,%s)',(number,numOfWord,1))
+                    conn.commit()
+                for word in wordInTweet:
+                    if cur.execute('select 1 from word_query where word=(%s) and query=(%s)',(word,number))==1:
+                        cur.execute('select tf from word_query where word=(%s) and query=(%s)',(word,number))
+                        conn.commit()
+                        tf=cur.fetchone()+wordInTweet[word]
+                        cur.execute('update word_query set tf=(%s) where word=(%s) and query=(%s)',(tf,word,number))
+                        conn.commit()
+                    else:
+                        cur.execute('inset into word_query(word,query,tf,numOfTweetOccurs) values(%s,%s,%s)',(word,number,1,0))
+                        conn.commit()
+                for word in numOfTweetOccurs:
+                    if cur.execute('select 1 from word_query where word=(%s) and query=(%s)',(word,number))==1:
+                        cur.execute('select numOfTweetOccurs from word_query where word=(%s) and query=(%s)',(word,number))
+                        conn.commit()
+                        num=cur.fetchone()
+                        cur.execute('update word_query set numOfTweetOccurs=(%s) where word=(%s) and query=(%s)',(num+1,word,number))
+                        conn.commit()
+                        
             else:
                 for word in stemwords_tweet:
                     if word in wordInStream:
                         wordInStream[word]+=1
                     else:
                         wordInStream[word]=1
-            cur.execute('')
-        else:
-            pass
-    
+            for word in stemwords_tweet:
+                if word in word_timestamp:
+                    deta=word_timestamp[word]-float(tweet['timestamp'])
+                    if deta < 7200000:
+                        decay=((float(deta-3600000.0))/3600000.0)*((float(deta-3600000.0))/3600000.0)
+                        word_decay[word]=decay
+                        word_timestamp[word]=float(tweet['timestamp_ms'])
+                    else:
+                        word_decay[word]=1
+                else:
+                    word_timestamp[word]=float(tweet['timestamp'])
+                    word_decay[word]=1
+            if count>=2:
+                for word in stemwords_tweet:
+                    cur.execute('select tf from word_query where word=(%s) and query=(%s)',(word,number))
+                    conn.commit()
+                    numofword=cur.fetchone()
+                    cur.execute('select numOfWord from queries where query=(%s)',number)
+                    conn.commit()
+                    numofwordinall=cur.fetch()
+                    tf=float(numofword)/float(numofwordinall)
+                    cur.execute('select numOfTweet from queries where query=(%s)',number)
+                    conn.commit()
+                    numoftweet=cur.fetch()
+                    cur.execute('select numOfTweetOccurs from word_query where word=(%s) and query=(%s)',(word,number))
+                    conn.commit()
+                    numoftweetoccurs=cur.fetchone()
+                    idf=float(numoftweet)/float(numoftweetoccurs)
+                    tfidf[word]=tf*idf*decay[word]
+                    Pti=float(wordInTweet[word])/float(numOfWord)
+                    Psi=float(wordInStream[word])/float(SumOfLenthOfStream)
+                    theta=lemda*Pti+(1-lemda)*Psi
+                    
+                sumoftfidf=sum(tfidf)
+                for summary in summaries[number]:
+                    sameword=[word for word in stemwords_tweet if word in summary]
+                    for word in sameword:
+                        Pti=float(wordInTweet[word])/float(numOfWord)
+                        Psi=float(wordInStream[word])/float(SumOfLenthOfStream)
+                        theta=lemda*Pti+(1-lemda)*Psi
+                        
+                cur.execute('insert into tweet_query, values((%s),(%s),(%s),(%s)',(str(tweet['id']), number, sumoftfidf, kld)
+                conn.commit()
+                
+      
+      
 if __name__=='__main__':
-    conn = pymysql.connect(host='localhost', port=3306,user='root',passwd='rusky',db='mysql',charset='UTF8mb4')
+    conn = pymysql.connect(host='localhost', port=3306,user='root',passwd='password',charset='UTF8mb4')
     cur = conn.cursor()
-    cur.execute('drop table if exists words')
+    cur.execute('create database if not exists mysql')
     conn.commit()
-    cur.execute('create table if not exists words (word varchar(255), lastTime bigint, tf bigint)')
+    conn.select_db('mysql')
     conn.commit()
-    cur.execute('drop table if exists query')
+    #cur.execute('drop table if exists words')
+    #conn.commit()
+    #cur.execute('create table if not exists words (word varchar(255) not null primary key, lastTime bigint, tf bigint)')
+    #conn.commit()
+    cur.execute('drop table if exists queries')
     conn.commit()
-    cur.execute('create table if not exists queries (query varchar(255), numOfTweet bigint, numOfWord bigint)')
+    cur.execute('create table if not exists queries (query varchar(255) not null primary key, numOfTweet bigint, numOfWord bigint)')
     conn.commit()
-    cur.execute('drop table if exists word-query')
+    cur.execute('drop table if exists word_query')
     conn.commit()
-    cur.execute('create table if not exists word-query (word varchar(255), query varchar(255), tf bigint, numOfTweetOccurs bigint)')
+    cur.execute('create table if not exists word_query (word varchar(255), query varchar(255), tf bigint, numOfTweetOccurs bigint), primary key (word, query)')
     conn.commit()
+    cur.execute('drop table if exists tweet_query')
+    conn.commit()
+    cur.execute('create table if not exists tweet_query (tweet varchar(255), query varchar(255), tfidf float, kld float,tweetcontent varchar(255)),primary key (tweet, query)')
+    conn.commit()
+    summaries={}
     wordInStream={}
     word_timestamp={}
     word_decay={}
     SumOfLenthOfStream=0
-    SumOfLenthOfTweet=0
+    lemda=0.9
+    #SumOfLenthOfTweet=0
     consumer_key="LVKmQgPwlxnDYkEgIUYyvJ1q3"
     consumer_secret="EDzft1TESd8huGgKJt5pvj1TzDOdHqsbdf1zF8MAcd1hrqQbI6"
     
@@ -189,26 +280,7 @@ if __name__=='__main__':
     auth.set_access_token(access_token,access_token_secret)
     #api = tweepy.API(auth, proxy='23.83.235.65:NDljMmVhNT@127.0.0.1:1080')
     api = tweepy.API(auth)
-    #api = tweepy.API(auth,proxy="")
-    """filepath='E:/TREC/TREC2015-tweetids.txt.bz2'
-    #print(api.get_status(622582311184306176))
-    with bz2file.open(filepath,'r') as fr:
-        #print(type(lines))
-        for line in fr:
-            strs=str(line,encoding='utf-8')   
-            #print(strs)
-            #print(strs.strip('\n'))
-            try:
-                fw=open('E:/TREC/TREC2015-tweet.txt','a') 
-                tweet=api.get_status(int(strs))
-                print('complete:'+ strs)
-                fw.write(str(tweet)+'\n')
-                fw.close()
-                #print(tweet)
-            except:
-                print('except:')
-                
-            """     
+    #api = tweepy.API(auth,proxy="") 
     myStreamListener = MyStreamListener()
     myStream = tweepy.Stream(auth = api.auth, listener=myStreamListener)
     #myStream.filter(track=['python'])
