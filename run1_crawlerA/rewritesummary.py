@@ -59,7 +59,7 @@ class PushSummary():
                 tweet = tem
             # t1 = T.time()
             delta = self.time.calculatetime(tweet['created_at'])
-            if delta == 1:
+            if delta >= 1:
                 for x in range(self.L):
                     self.numofdayA[x] = 0
                     self.numofdayB[x] = 0
