@@ -108,7 +108,7 @@ class PushSummary():
                                 d = '2016080' + day
                             with open('B.txt', 'a') as ff:
                                 ff.write(
-                                    '%s %s Q0 %s %s %s CCNUNLPrun2\n' % (d, self.topicid[x], i[1], str(j), i[0]))
+                                    '%s %s Q0 %s %s %s CCNUNLPrun1\n' % (d, self.topicid[x], i[1], str(j), i[0]))
                             j = j + 1
                 self.time.settime()
                 self.day = self.day + 1
