@@ -65,7 +65,7 @@ class PushSummary():
                 tem['created_at'] = tweet['created_at']
                 tweet = tem
             delta = self.time.calculatetime(tweet['created_at'])
-            if delta == 1:
+            if delta >= 1:
                 for x in range(self.L):
                     stemwords_interest_profile = self.interest_files[x]
                     self.numofdayA[x] = 0
